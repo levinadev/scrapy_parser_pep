@@ -1,3 +1,4 @@
+setuptools==80.9.0
 attrs==21.4.0
 Automat==20.2.0
 cffi==1.15.0
