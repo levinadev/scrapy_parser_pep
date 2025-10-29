@@ -11,51 +11,59 @@ class PepSpider(scrapy.Spider):
     def parse(self, response):
         """
         Метод парсит стартовую страницу и собирает ссылки на документы PEP.
+        Используется альтернативный селектор, ищущий все ссылки на PEP.
         """
-        # Находим все строки таблицы с PEP (кроме заголовка)
-        # Предполагаем, что таблица одна или все нужные ссылки находятся в
-        # общем селекторе:
-        pep_links = response.css('section#index-by-category table.pep-index tbody tr')
+        self.logger.info('--- Начинаем парсинг стартовой страницы ---')
 
-        for pep_link in pep_links:
-            # Извлекаем относительную ссылку на документ PEP
-            relative_url = pep_link.css('td a::attr(href)').get()
+        # 🎯 КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: Находим все теги <a>,
+        # чей атрибут href начинается со слова 'pep-'
+        links = response.css('a[href^="pep-"]::attr(href)').getall()
 
-            # Если ссылки нет, пропускаем
-            if not relative_url:
+        self.logger.debug(f'Найдено потенциальных ссылок на PEP: {len(links)}')
+
+        link_count = 0
+        for link in links:
+            # Пропускаем PEP 0, который обычно не содержит нужной информации
+            if link.lower().endswith('pep-0000/'):
                 continue
 
-            # Формируем полную ссылку
-            full_url = urljoin(response.url, relative_url)
+            link_count += 1
+            yield response.follow(link, callback=self.parse_pep)
 
-            # Отправляем запрос на страницу PEP для парсинга
-            yield response.follow(full_url, callback=self.parse_pep)
+        self.logger.info(f'--- Завершено сканирование стартовой страницы. Отправлено запросов на PEP: {link_count} ---')
 
     def parse_pep(self, response):
         """
         Метод парсит страницы с документами PEP и формирует Items.
         """
-        # Селектор для извлечения номера (например, 8) и имени (например, The Style Guide for Python Code)
-        # Номер находится в заголовке, например: #PEP 8 – The Style Guide for Python Code
-        title = response.css('h1.page-title::text').get().strip()
+        self.logger.debug(f'Обработка страницы: {response.url}')
 
-        # Регулярное выражение или разбор строки для извлечения номера и имени
-        # Пример: 'PEP 8 – The Style Guide for Python Code'
+        title = response.css('h1.page-title::text').get()
+        if not title:
+            self.logger.warning(f"Не найден заголовок h1.page-title на странице {response.url}. Item не будет создан.")
+            return
+
+        title = title.strip()
+
         try:
             # Извлекаем номер и имя
             number_str, name = title.split(' – ', 1)
-            number = number_str.split()[1]  # Берем "8" из "PEP 8"
+            number = number_str.split()[1]
         except ValueError:
-            # Обработка случаев, когда заголовок не в ожидаемом формате
-            self.logger.warning(f"Не удалось распарсить заголовок PEP на странице {response.url}: {title}")
+            self.logger.warning(
+                f"Не удалось распарсить заголовок PEP на странице {response.url}: {title}. Ожидается 'PEP N – Name'.")
             return
 
         # Селектор для извлечения статуса
-        # Статус находится в метаданных: <dt>Status</dt><dd><abbr title="Final">Final</abbr></dd>
         status = response.css('dt:contains("Status") + dd abbr::text').get()
 
         if status:
             status = status.strip()
+        else:
+            self.logger.warning(f"Статус не найден на странице {response.url}")
+            status = 'не указан'  # Устанавливаем статус по умолчанию, если не нашли
+
+        self.logger.info(f'--- СПАРШЕНО: PEP {number} | Статус: {status} | Название: {name[:40]}... ---')
 
         # Создаем и заполняем Item
         pep_item = PepParseItem(
