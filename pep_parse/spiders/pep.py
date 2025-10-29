@@ -23,8 +23,6 @@ class PepSpider(scrapy.Spider):
             link_count += 1
             yield response.follow(link, callback=self.parse_pep)
 
-        self.logger.info(f'Запуск паука завершен. Отправлено запросов на PEP: {link_count}')
-
     def parse_pep(self, response):
         """
         Метод парсит страницы с документами PEP и формирует Items.
@@ -32,7 +30,10 @@ class PepSpider(scrapy.Spider):
 
         title = response.css('h1.page-title::text').get()
         if not title:
-            self.logger.warning(f"Не найден заголовок h1.page-title на странице {response.url}. Item не будет создан.")
+            self.logger.warning(
+                f"Не найден заголовок h1.page-title на странице {response.url}. "
+                "Item не будет создан."
+            )
             return
 
         title = title.strip()
@@ -42,7 +43,9 @@ class PepSpider(scrapy.Spider):
             number = number_str.split()[1]
         except ValueError:
             self.logger.warning(
-                f"Не удалось распарсить заголовок PEP на странице {response.url}: {title}. Ожидается 'PEP N – Name'.")
+                f"Ошибка парсинга заголовка PEP на {response.url}: {title}. "
+                "Ожидался формат 'PEP N – Name'."
+            )
             return
 
         status = response.css('dt:contains("Status") + dd abbr::text').get()
@@ -53,7 +56,9 @@ class PepSpider(scrapy.Spider):
             self.logger.warning(f"Статус не найден на странице {response.url}")
             status = 'не указан'
 
-        self.logger.info(f'СПАРШЕНО: PEP {number} | Статус: {status} | Название: {name[:40]}...')
+        self.logger.info(
+            f"PEP {number} | {status} | {name[:40]}..."
+        )
 
         pep_item = PepParseItem(
             number=number,
