@@ -1,3 +1,20 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent.parent
+DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
+FILE_FORMAT = 'csv'
+
+RESULTS = 'results'
+RESULTS_DIR = BASE_DIR / RESULTS
+
+# LOG_FILE = RESULTS_DIR / 'parser.logs'
+LOG_FORMAT = '%(asctime)s - [%(levelname)s] - %(message)s'
+LOG_LEVEL = 'DEBUG'
+LOG_FILE_APPEND = True
+
+SUMMARY_NAME = 'status_summary'
+SUMMARY_TABLE_HEADER = ('Status', 'Quantity')
+SUMMARY_TABLE_BOTTOM = 'Total'
 BOT_NAME = 'pep_parse'
 
 SPIDER_MODULES = ['pep_parse.spiders']
@@ -22,5 +39,3 @@ ITEM_PIPELINES = {
 }
 
 PEP_STATUS_SUMMARY_FILENAME = 'status_summary_%(time)s.csv'
-
-LOG_LEVEL = 'DEBUG'
