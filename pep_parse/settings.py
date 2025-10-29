@@ -16,6 +16,23 @@ NEWSPIDER_MODULE = 'pep_parse.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'pep_parse (+http://www.yourdomain.com)'
 
+
+# Настройка кодировки для CSV
+FEED_EXPORT_ENCODING = 'utf-8'
+
+
+# Устанавливаем пути и формат для первого файла (список PEP) через Feeds
+FEEDS = {
+    'results/pep_%(time)s.csv': {
+        'format': 'csv',
+        'fields': ['number', 'name', 'status'],
+        'overwrite': True,
+    }
+}
+
+
+FEED_EXPORT_FIELDS = ['number', 'name', 'status']
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
@@ -62,9 +79,14 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'pep_parse.pipelines.PepParsePipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'pep_parse.pipelines.PepParsePipeline': 300,
+}
+
+
+# Настройки для Pipeline:
+# Формат имени файла для сводки по статусам
+PEP_STATUS_SUMMARY_FILENAME = 'status_summary_%(time)s.csv'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
