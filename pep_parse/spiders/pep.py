@@ -1,5 +1,4 @@
 import scrapy
-from urllib.parse import urljoin
 from pep_parse.items import PepParseItem
 
 
@@ -15,15 +14,12 @@ class PepSpider(scrapy.Spider):
         """
         self.logger.info('--- Начинаем парсинг стартовой страницы ---')
 
-        # 🎯 КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: Находим все теги <a>,
-        # чей атрибут href начинается со слова 'pep-'
         links = response.css('a[href^="pep-"]::attr(href)').getall()
 
         self.logger.debug(f'Найдено потенциальных ссылок на PEP: {len(links)}')
 
         link_count = 0
         for link in links:
-            # Пропускаем PEP 0, который обычно не содержит нужной информации
             if link.lower().endswith('pep-0000/'):
                 continue
 
@@ -46,7 +42,6 @@ class PepSpider(scrapy.Spider):
         title = title.strip()
 
         try:
-            # Извлекаем номер и имя
             number_str, name = title.split(' – ', 1)
             number = number_str.split()[1]
         except ValueError:
@@ -54,7 +49,6 @@ class PepSpider(scrapy.Spider):
                 f"Не удалось распарсить заголовок PEP на странице {response.url}: {title}. Ожидается 'PEP N – Name'.")
             return
 
-        # Селектор для извлечения статуса
         status = response.css('dt:contains("Status") + dd abbr::text').get()
 
         if status:
@@ -65,7 +59,6 @@ class PepSpider(scrapy.Spider):
 
         self.logger.info(f'--- СПАРШЕНО: PEP {number} | Статус: {status} | Название: {name[:40]}... ---')
 
-        # Создаем и заполняем Item
         pep_item = PepParseItem(
             number=number,
             name=name,
