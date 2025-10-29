@@ -30,10 +30,7 @@ class PepSpider(scrapy.Spider):
 
         title = response.css('h1.page-title::text').get()
         if not title:
-            self.logger.warning(
-                f"Не найден заголовок h1.page-title на странице {response.url}. "
-                "Item не будет создан."
-            )
+            self.logger.warning("Нет h1.page-title, пропуск Item")
             return
 
         title = title.strip()
