@@ -3,8 +3,12 @@ import datetime as dt
 from collections import defaultdict
 
 from pep_parse.settings import (
-    BASE_DIR, DATETIME_FORMAT, FILE_FORMAT,
-    RESULTS, SUMMARY_NAME, SUMMARY_TABLE_BOTTOM,
+    BASE_DIR,
+    DATETIME_FORMAT,
+    FILE_FORMAT,
+    RESULTS,
+    SUMMARY_NAME,
+    SUMMARY_TABLE_BOTTOM,
     SUMMARY_TABLE_HEADER
 )
 
