@@ -4,13 +4,24 @@ from pep_parse.items import PepParseItem
 
 
 class PepSpider(scrapy.Spider):
+    """
+    Паук для парсинга списка всех PEP (Python Enhancement Proposals).
+
+    1. Начинает с главной страницы https://peps.python.org/.
+    2. Собирает ссылки на страницы всех PEP.
+    3. Переходит по каждой ссылке и извлекает:
+       - Номер PEP-документа;
+       - Название PEP-документа;
+       - Текущий статус PEP.
+    """
     name = 'pep'
     allowed_domains = ['peps.python.org']
     start_urls = ['https://peps.python.org/']
 
     def parse(self, response):
         """
-        Метод парсит стартовую страницу и собирает ссылки на документы PEP.
+        Собирает ссылки на страницы всех PEP со страницы каталога.
+        Для каждой найденной ссылки вызывает метод parse_pep().
         """
 
         links = response.css('a[href^="pep-"]::attr(href)').getall()
@@ -25,7 +36,11 @@ class PepSpider(scrapy.Spider):
 
     def parse_pep(self, response):
         """
-        Метод парсит страницы с документами PEP и формирует Items.
+        Парсит страницу конкретного PEP и извлекает данные:
+        - Номер PEP-документа;
+        - Название PEP-документа;
+        - Текущий статус PEP.
+        Возвращает экземпляр PepParseItem.
         """
 
         title = response.css('h1.page-title::text').get()
