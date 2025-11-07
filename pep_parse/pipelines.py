@@ -5,6 +5,7 @@ from collections import defaultdict
 from pep_parse import settings
 
 class PepParsePipeline:
+    """Pipeline собирает статистику по статусам и пишет csv-файл со сводкой."""
 
     def __init__(self):
         self.results_dir = settings.RESULTS_DIR
