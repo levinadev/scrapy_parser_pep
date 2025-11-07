@@ -8,28 +8,30 @@ class PepParsePipeline:
     """Pipeline собирает статистику по статусам и пишет csv-файл со сводкой."""
 
     def __init__(self):
-        self.results_dir = settings.RESULTS_DIR
-        self.results_dir.mkdir(exist_ok=True)
+        self.output_dir = settings.RESULTS_DIR
+        self.output_dir.mkdir(exist_ok=True)
+        self._status_counts = defaultdict(int)
 
     def open_spider(self, spider):
-        self.statuses = defaultdict(int)
+        """Вызывается при старте паука, сбрасываем предыдущие данные."""
+        self._status_counts.clear()
 
     def process_item(self, item, spider):
-        self.statuses[item.get('status')] += 1
+        """Считаем количество каждого статуса PEP."""
+        status = item.get("status", "unknown")
+        self._status_counts[status] += 1
         return item
 
     def close_spider(self, spider):
-        now = datetime.now()
-        now_formatted = now.strftime(settings.TIME_PATTERN)
-        file_name = f'{settings.PREFIX}_{now_formatted}.{settings.DOC_EXTENSION}'
-        file_path = self.results_dir / file_name
-        with open(file_path, mode='w', encoding='utf-8') as csvfile:
-            csv.writer(
-                csvfile,
-                dialect=csv.unix_dialect,
-                quoting=csv.QUOTE_NONE,
-            ).writerows([
-                settings.TABLE_HEADINGS,
-                *self.statuses.items(),
-                (settings.TOTAL_TAG, sum(self.statuses.values())),
-            ])
+        """По завершении работы паука создаём CSV со сводкой."""
+        now_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        summary_file = self.output_dir / f"status_summary_{now_str}.csv"
+
+        total_count = sum(self._status_counts.values())
+
+        with summary_file.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Статус", "Количество"])
+            for status, count in sorted(self._status_counts.items()):
+                writer.writerow([status, count])
+            writer.writerow(["Total", total_count])
