@@ -1,16 +1,12 @@
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+ROOT_PATH = Path(__file__).parent.parent
 DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 FILE_FORMAT = 'csv'
 
-RESULTS = 'results'
-RESULTS_DIR = BASE_DIR / RESULTS
+EXPORT_FOLDER = 'results'
+RESULTS_DIR = ROOT_PATH / EXPORT_FOLDER
 
-# LOG_FILE = RESULTS_DIR / 'parser.logs'
-LOG_FORMAT = '%(asctime)s - [%(levelname)s] - %(message)s'
-LOG_LEVEL = 'DEBUG'
-LOG_FILE_APPEND = True
 
 SUMMARY_NAME = 'status_summary'
 SUMMARY_TABLE_HEADER = ('Status', 'Quantity')

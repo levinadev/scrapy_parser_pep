@@ -7,7 +7,7 @@ from pep_parse import settings
 class PepParsePipeline:
 
     def __init__(self):
-        self.results_dir = settings.BASE_DIR / settings.RESULTS
+        self.results_dir = settings.RESULTS_DIR
         self.results_dir.mkdir(exist_ok=True)
 
     def open_spider(self, spider):
