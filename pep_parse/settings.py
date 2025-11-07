@@ -1,25 +1,22 @@
 from pathlib import Path
 
-# Главная директория проекта
-ROOT_PATH = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent
+DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
+FILE_FORMAT = 'csv'
 
-# Формат даты и времени для имени файла
-TIME_PATTERN = '%Y-%m-%d_%H-%M-%S'
+RESULTS = 'results'
+RESULTS_DIR = BASE_DIR / RESULTS
 
-# Расширение создаваемых документов
-DOC_EXTENSION = 'csv'
+# LOG_FILE = RESULTS_DIR / 'parser.logs'
+LOG_FORMAT = '%(asctime)s - [%(levelname)s] - %(message)s'
+LOG_LEVEL = 'DEBUG'
+LOG_FILE_APPEND = True
 
-# Название директории для экспортов
-EXPORT_FOLDER = 'results'
-RESULTS_DIR = ROOT_PATH / EXPORT_FOLDER
-
-# Параметры для сводной таблицы
-PREFIX = 'status_summary'
-TABLE_HEADINGS = ('Status', 'Quantity')
-GRAND_TOTAL_TAG = 'Total'
-
-# Настройки Scrapy
+SUMMARY_NAME = 'status_summary'
+SUMMARY_TABLE_HEADER = ('Status', 'Quantity')
+SUMMARY_TABLE_BOTTOM = 'Total'
 BOT_NAME = 'pep_parse'
+
 SPIDER_MODULES = ['pep_parse.spiders']
 NEWSPIDER_MODULE = 'pep_parse.spiders'
 
