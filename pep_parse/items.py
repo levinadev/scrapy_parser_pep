@@ -4,10 +4,17 @@ import scrapy
 class PepParseItem(scrapy.Item):
     """
     Описание структуры данных для парсинга PEP-документов.
-    Каждый объект этого класса представляет один PEP.
+
+    Каждый объект этого класса представляет собой один документ PEP
+    и используется для хранения данных, собранных пауком.
+
+    Атрибуты:
+        number (scrapy.Field): Номер PEP-документа (например, '8', '484').
+        name (scrapy.Field): Название PEP-документа (короткое описание).
+        status (scrapy.Field): Текущий статус PEP (например, 'Active', 'Accepted').
     """
     number = scrapy.Field(
-        desciption='Номер PEP-документа'
+        description='Номер PEP-документа'
     )
     name = scrapy.Field(
         description='Название PEP-документа'
@@ -15,3 +22,13 @@ class PepParseItem(scrapy.Item):
     status = scrapy.Field(
         description='Текущий статус PEP'
     )
+
+    def __repr__(self) -> str:
+        """
+        Возвращает удобное строковое представление объекта для отладки.
+        Например: <PepParseItem PEP 8: 'Style Guide for Python Code' (Active)>
+        """
+        num = self.get('number', '?')
+        name = self.get('name', 'Unknown')
+        status = self.get('status', 'Unknown')
+        return f"<PepParseItem PEP {num}: '{name}' ({status})>"
