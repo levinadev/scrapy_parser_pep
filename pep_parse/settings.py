@@ -1,41 +1,52 @@
+"""
+Настройки проекта Scrapy для парсинга PEP-документов.
+"""
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
-DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
-FILE_FORMAT = 'csv'
+# Корневая директория проекта (один уровень выше текущего файла settings.py)
+ROOT_PATH: Path = Path(__file__).parent.parent
 
-RESULTS = 'results'
-RESULTS_DIR = BASE_DIR / RESULTS
+# Расширение файлов CSV для сохранения результатов
+DOC_EXTENSION: str = 'csv'
 
-# LOG_FILE = RESULTS_DIR / 'parser.logs'
-LOG_FORMAT = '%(asctime)s - [%(levelname)s] - %(message)s'
-LOG_LEVEL = 'DEBUG'
-LOG_FILE_APPEND = True
+# Название папки, где будут сохраняться результаты парсинга
+EXPORT_FOLDER: str = 'results'
 
-SUMMARY_NAME = 'status_summary'
-SUMMARY_TABLE_HEADER = ('Status', 'Quantity')
-SUMMARY_TABLE_BOTTOM = 'Total'
-BOT_NAME = 'pep_parse'
+# Полный путь к директории для сохранения CSV-файлов
+RESULTS_DIR: Path = ROOT_PATH / EXPORT_FOLDER
 
-SPIDER_MODULES = ['pep_parse.spiders']
-NEWSPIDER_MODULE = 'pep_parse.spiders'
+# Префикс для файлов со сводкой по статусам PEP
+PREFIX: str = 'status_summary'
 
-FEED_EXPORT_ENCODING = 'utf-8'
+# Имя бота Scrapy (идентификатор проекта)
+BOT_NAME: str = 'pep_parse'
 
-FEEDS = {
-    'results/pep_%(time)s.csv': {
-        'format': 'csv',
-        'fields': ['number', 'name', 'status'],
-        'overwrite': True,
+# Модули, где Scrapy ищет пауков
+SPIDER_MODULES: list[str] = ['pep_parse.spiders']
+
+# Модуль, куда создаются новые пауки через команду 'scrapy genspider'
+NEWSPIDER_MODULE: str = 'pep_parse.spiders'
+
+# Кодировка для экспорта данных через Feeds (CSV, JSON и т.д.)
+FEED_EXPORT_ENCODING: str = 'utf-8'
+
+# Настройки Feeds для автоматического сохранения списка PEP в CSV
+FEEDS: dict[str, dict] = {
+    'results/pep_%(time)s.csv': {  # Путь к файлу, %(time)s
+        'format': 'csv',  # Формат сохраняемого файла
+        'fields': ['number', 'name', 'status'],  # Порядок колонок в CSV
+        'overwrite': True,  # Перезаписывать файл, если он уже существует
     }
 }
 
-FEED_EXPORT_FIELDS = ['number', 'name', 'status']
+# Соблюдать правила robots.txt на сайте при парсинге
+ROBOTSTXT_OBEY: bool = True
 
-ROBOTSTXT_OBEY = True
-
-ITEM_PIPELINES = {
-    'pep_parse.pipelines.PepParsePipeline': 300,
+# Настройка пайплайнов Scrapy
+ITEM_PIPELINES: dict[str, int] = {
+    'pep_parse.pipelines.PepParsePipeline': 300,  # Подсчёт статусов PEP
 }
 
-PEP_STATUS_SUMMARY_FILENAME = 'status_summary_%(time)s.csv'
+# Шаблон имени файла для сводки по статусам PEP
+# %(time)s будет автоматически заменён на метку времени
+PEP_STATUS_SUMMARY_FILENAME: str = 'status_summary_%(time)s.csv'
