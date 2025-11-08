@@ -1,6 +1,8 @@
+from typing import Generator, Optional
+
 import scrapy
 from scrapy.http import Response
-from typing import Generator, Optional
+
 from pep_parse.items import PepParseItem
 
 

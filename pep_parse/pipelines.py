@@ -2,10 +2,12 @@ import csv
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-import scrapy
-from pep_parse import settings
-from typing import DefaultDict
 import logging
+from typing import DefaultDict
+
+import scrapy
+
+from pep_parse import settings
 
 
 class PepParsePipeline:
