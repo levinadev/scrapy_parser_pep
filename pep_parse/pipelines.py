@@ -1,3 +1,19 @@
+"""
+pep_parse/pipelines.py
+
+Pipeline для Scrapy-паука `PepSpider`, который:
+1. Собирает статистику по статусам PEP-документов.
+2. Формирует CSV-отчёт с количеством документов по каждому статусу.
+3. Логирует процесс обработки и возможные ошибки.
+
+Файл CSV создаётся в директории `settings.RESULTS_DIR` и имеет формат:
+'status_summary_YYYY-MM-DD_HH-MM-SS.csv'
+
+Структура CSV:
+    - Статус: название статуса PEP
+    - Количество: число документов с данным статусом
+    - Последняя строка Total: суммарное количество документов
+"""
 import csv
 from pathlib import Path
 from datetime import datetime
