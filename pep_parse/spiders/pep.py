@@ -19,7 +19,10 @@ class PepSpider(scrapy.Spider):
     allowed_domains: list[str] = ['peps.python.org']
     start_urls: list[str] = ['https://peps.python.org/']
 
-    def parse(self, response: Response) -> Generator[scrapy.Request, None, None]:
+    def parse(
+            self,
+            response: Response,
+    ) -> Generator[scrapy.Request, None, None]:
         """
         Собирает ссылки на страницы всех PEP со страницы каталога.
         Для каждой найденной ссылки вызывает метод parse_pep().
@@ -29,7 +32,6 @@ class PepSpider(scrapy.Spider):
         return:
             Генератор scrapy.Request для перехода по ссылкам.
         """
-
         links: list[str] = response.css('a[href^="pep-"]::attr(href)').getall()
         link_count: int = 0
 
@@ -41,7 +43,10 @@ class PepSpider(scrapy.Spider):
             link_count += 1
             yield response.follow(link, callback=self.parse_pep)
 
-    def parse_pep(self, response: Response) -> Generator[PepParseItem, None, None]:
+    def parse_pep(
+            self,
+            response: Response,
+    ) -> Generator[PepParseItem, None, None]:
         """
         Парсит страницу конкретного PEP и извлекает данные:
         - Номер PEP-документа;
@@ -73,7 +78,11 @@ class PepSpider(scrapy.Spider):
             )
             return
 
-        status: Optional[str] = response.css('dt:contains("Status") + dd abbr::text').get()
+        status: Optional[str] = (
+            response
+            .css('dt:contains("Status") + dd abbr::text')
+            .get()
+        )
 
         if status:
             status = status.strip()

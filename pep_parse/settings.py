@@ -42,7 +42,7 @@ FEED_EXPORT_ENCODING: str = 'utf-8'
 
 # Настройки Feeds для автоматического сохранения списка PEP в CSV
 FEEDS: dict[str, dict] = {
-    'results/pep_%(time)s.csv': {  # Путь к файлу, %(time)s подставляется автоматически
+    'results/pep_%(time)s.csv': {  # Путь к файлу, %(time)s
         'format': 'csv',  # Формат сохраняемого файла
         'fields': ['number', 'name', 'status'],  # Порядок колонок в CSV
         'overwrite': True,  # Перезаписывать файл, если он уже существует

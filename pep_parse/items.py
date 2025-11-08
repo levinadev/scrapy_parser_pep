@@ -11,7 +11,7 @@ class PepParseItem(scrapy.Item):
     Атрибуты:
         number (scrapy.Field): Номер PEP-документа (например, '8', '484').
         name (scrapy.Field): Название PEP-документа (короткое описание).
-        status (scrapy.Field): Текущий статус PEP (например, 'Active', 'Accepted').
+        status (scrapy.Field): Текущий статус PEP (например, 'Active').
     """
     number = scrapy.Field(
         description='Номер PEP-документа'

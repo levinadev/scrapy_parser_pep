@@ -19,7 +19,7 @@ class PepParsePipeline:
     В файле содержатся два столбца:
         - 'Статус': название статуса PEP;
         - 'Количество': число документов с данным статусом;
-    Последняя строка файла 'Total' содержит суммарное количество всех документов.
+    Строка файла 'Total' содержит суммарное количество документов.
     """
 
     def __init__(self) -> None:
@@ -53,9 +53,16 @@ class PepParsePipeline:
             None
         """
         self._status_counts.clear()
-        self.logger.info(f'[{spider.name}] Pipeline запущен. Счётчики статусов сброшены.')
+        self.logger.info(
+            f'[{spider.name}] Pipeline запущен. '
+            f'Счётчики статусов сброшены.'
+        )
 
-    def process_item(self, item: scrapy.Item, spider: scrapy.Spider) -> scrapy.Item:
+    def process_item(
+            self,
+            item: scrapy.Item,
+            spider: scrapy.Spider,
+    ) -> scrapy.Item:
         """
         Обрабатывает каждый элемент, подсчитывая количество документов
         в каждом статусе PEP.
@@ -77,13 +84,16 @@ class PepParsePipeline:
         if not isinstance(status, str) or not status.strip():
             status = 'Unknown'
             self.logger.warning(
-                f'[{spider.name}] PEP без корректного статуса: {item.get("number", "неизвестно")}'
+                f'[{spider.name}] PEP без корректного статуса: '
+                f'{item.get("number", "неизвестно")}'
             )
 
         # Увеличиваем счётчик для данного статуса
         self._status_counts[status] += 1
         # Логирование
-        self.logger.debug(f'[{spider.name}] Обработан PEP с статусом: {status}')
+        self.logger.debug(
+            f'[{spider.name}] Обработан PEP с статусом: {status}'
+        )
         # Возвращаем элемент дальше по цепочке пайплайнов
         return item
 
@@ -98,28 +108,36 @@ class PepParsePipeline:
             None
         """
         if not self._status_counts:
-            self.logger.warning(f'[{spider.name}] Не было обработано ни одного PEP.')
+            self.logger.warning(
+                f'[{spider.name}] Не было обработано ни одного PEP.'
+            )
 
         # Формируем имя файла с меткой времени
         now_str: str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         summary_file: Path = self.output_dir / f'status_summary_{now_str}.csv'
 
         if not self.output_dir.exists():
-            self.logger.error(f'[{spider.name}] Директория для CSV не существует: {self.output_dir}')
+            self.logger.error(
+                f'[{spider.name}] Директория для CSV не существует: '
+                f'{self.output_dir}'
+            )
             return
-
-        # Подсчитываем общее количество документов
-        total_count: int = sum(self._status_counts.values())
 
         # Подсчитываем общее количество документов
         total_count: int = sum(self._status_counts.values())
 
         # Фильтруем некорректные статусы
         valid_statuses: dict[str, int] = {
-            k: v for k, v in self._status_counts.items() if k and isinstance(k, str)
+            k: v
+            for k, v in self._status_counts.items()
+            if k and isinstance(k, str)
         }
+
         if len(valid_statuses) < len(self._status_counts):
-            self.logger.warning(f'[{spider.name}] Некоторые статусы некорректны и были проигнорированы.')
+            self.logger.warning(
+                f'[{spider.name}] Некоторые статусы некорректны '
+                'и были проигнорированы.'
+            )
 
         # Записываем CSV
         try:
@@ -135,8 +153,13 @@ class PepParsePipeline:
 
         # Проверка успешного создания CSV
         if summary_file.exists() and summary_file.stat().st_size > 0:
-            self.logger.info(f'[{spider.name}] CSV успешно создан ({summary_file.stat().st_size} байт): {summary_file}')
+            self.logger.info(
+                f'[{spider.name}] CSV успешно создан '
+                f'({summary_file.stat().st_size} байт): {summary_file}'
+            )
         else:
-            self.logger.error(f'[{spider.name}] CSV пустой или не создан: {summary_file}')
+            self.logger.error(
+                f'[{spider.name}] CSV пустой или не создан: {summary_file}'
+            )
 
         self.logger.info(f'[{spider.name}] Всего документов: {total_count}')
