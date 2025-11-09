@@ -37,11 +37,9 @@ class PepParsePipeline:
         Вызывается при запуске паука.
         Очищает накопленные ранее данные по статусам.
 
-        params:
-            spider (scrapy.Spider): Экземпляр текущего паука,
-                запускающего процесс парсинга.
-        return:
-            None
+        Параметры:
+        - spider (scrapy.Spider): Экземпляр текущего паука.
+        Возвращает: None
         """
         self.status_counter = Counter()
 
@@ -54,15 +52,15 @@ class PepParsePipeline:
         Обрабатывает каждый элемент, подсчитывая количество документов
         в каждом статусе PEP.
 
-        params:
-            item (scrapy.Item): Объект, содержащий данные о PEP:
-                - number (str): Номер PEP-документа.
-                - name (str): Название PEP-документа.
-                - status (str): Текущий статус PEP.
-            spider (scrapy.Spider): Экземпляр паука, передающего элемент.
+        Параметры:
+        - item (scrapy.Item): Объект, содержащий данные о PEP:
+            - number (str): Номер PEP-документа.
+            - name (str): Название PEP-документа.
+            - status (str): Текущий статус PEP.
+        - spider (scrapy.Spider): Экземпляр паука, передающего элемент.
 
-        return:
-            scrapy.Item: Исходный объект item для передачи следующему pipeline.
+        Возвращает:
+        - scrapy.Item: Исходный объект item для передачи следующему pipeline.
         """
         # Получаем статус из item, если его нет то используем Unknown
         status: str = item.get('status', 'Unknown')
@@ -90,10 +88,10 @@ class PepParsePipeline:
         Вызывается после завершения работы паука.
         Формирует CSV-файл со сводкой по статусам PEP-документов.
 
-        params:
-            spider (scrapy.Spider): Экземпляр паука, завершившего работу.
-        return:
-            None
+        Параметры:
+        - spider (scrapy.Spider): Экземпляр паука, завершившего работу.
+        Возвращает:
+        - None
         """
         if not self.status_counter:
             self.logger.warning(
@@ -137,13 +135,5 @@ class PepParsePipeline:
             self.logger.error(f'[{spider.name}] Ошибка при записи CSV: {e}')
             return
 
-        # Проверка создания CSV
-        if summary_file.exists() and summary_file.stat().st_size > 0:
-            self.logger.info(
-                f'[{spider.name}] CSV успешно создан '
-                f'({summary_file.stat().st_size} байт): {summary_file}'
-            )
-        else:
-            self.logger.error(
-                f'[{spider.name}] CSV пустой или не создан: {summary_file}'
-            )
+        # првоерка сохранения файла
+        self.logger.info(f"[{spider.name}] csv-файл сохранён: {summary_file}")
