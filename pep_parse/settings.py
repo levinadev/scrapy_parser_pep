@@ -3,7 +3,7 @@
 """
 from pathlib import Path
 
-# Корневая директория проекта (один уровень выше текущего файла settings.py)
+# Корневая директория проекта
 ROOT_PATH: Path = Path(__file__).parent.parent
 
 # Расширение файлов CSV для сохранения результатов
@@ -24,15 +24,15 @@ BOT_NAME: str = 'pep_parse'
 # Модули, где Scrapy ищет пауков
 SPIDER_MODULES: list[str] = ['pep_parse.spiders']
 
-# Модуль, куда создаются новые пауки через команду 'scrapy genspider'
+# Модуль, куда создаются новые пауки
 NEWSPIDER_MODULE: str = 'pep_parse.spiders'
 
-# Кодировка для экспорта данных через Feeds (CSV, JSON и т.д.)
+# Кодировка для экспорта данных через Feeds
 FEED_EXPORT_ENCODING: str = 'utf-8'
 
-# Настройки Feeds для автоматического сохранения списка PEP в CSV
+# Настройки Feeds
 FEEDS: dict[str, dict] = {
-    'results/pep_%(time)s.csv': {  # Путь к файлу, %(time)s
+    'results/pep_%(time)s.csv': {  # Путь к файл
         'format': 'csv',  # Формат сохраняемого файла
         'fields': ['number', 'name', 'status'],  # Порядок колонок в CSV
         'overwrite': True,  # Перезаписывать файл, если он уже существует
