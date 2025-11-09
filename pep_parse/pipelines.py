@@ -14,12 +14,10 @@ Pipeline для Scrapy-паука `PepSpider`, который:
 - Количество: число документов с данным статусом
 - Последняя строка Total: суммарное количество документов
 """
-import csv
 from pathlib import Path
 from datetime import datetime
-from collections import defaultdict
 import logging
-from typing import DefaultDict
+from collections import Counter
 
 import scrapy
 
@@ -27,18 +25,6 @@ from pep_parse import settings
 
 
 class PepParsePipeline:
-    """
-    Pipeline собирает статистику по статусам PEP-документов
-    и записывает сводный отчёт в CSV-файл.
-
-    После завершения работы паука создаётся файл формата:
-    'status_summary_YYYY-MM-DD_HH-MM-SS.csv'
-
-    В файле содержатся два столбца:
-        - 'Статус': название статуса PEP;
-        - 'Количество': число документов с данным статусом;
-    Строка файла 'Total' содержит суммарное количество документов.
-    """
 
     def __init__(self) -> None:
         """
@@ -55,7 +41,7 @@ class PepParsePipeline:
         # Создаём директорию, если её нет
         self.output_dir.mkdir(exist_ok=True)
         # Словарь для подсчёта количества документов по каждому статусу
-        self._status_counts: DefaultDict[str, int] = defaultdict(int)
+        self.status_counter: Counter[str] = Counter()
         # Логгер
         self.logger = logging.getLogger(__name__)
 
@@ -70,7 +56,8 @@ class PepParsePipeline:
         return:
             None
         """
-        self._status_counts.clear()
+        self.status_counter = Counter()
+
         self.logger.info(
             f'[{spider.name}] Pipeline запущен. '
             f'Счётчики статусов сброшены.'
@@ -107,7 +94,8 @@ class PepParsePipeline:
             )
 
         # Увеличиваем счётчик для данного статуса
-        self._status_counts[status] += 1
+        self.status_counter[status] += 1
+
         # Логирование
         self.logger.debug(
             f'[{spider.name}] Обработан PEP с статусом: {status}'
@@ -125,7 +113,7 @@ class PepParsePipeline:
         return:
             None
         """
-        if not self._status_counts:
+        if not self.status_counter:
             self.logger.warning(
                 f'[{spider.name}] Не было обработано ни одного PEP.'
             )
@@ -141,17 +129,16 @@ class PepParsePipeline:
             )
             return
 
-        # Подсчитываем общее количество документов
-        total_count: int = sum(self._status_counts.values())
+        total_count: int = sum(self.status_counter.values())
 
         # Фильтруем некорректные статусы
         valid_statuses: dict[str, int] = {
             k: v
-            for k, v in self._status_counts.items()
+            for k, v in self.status_counter.items()
             if k and isinstance(k, str)
         }
 
-        if len(valid_statuses) < len(self._status_counts):
+        if len(valid_statuses) < len(self.status_counter):
             self.logger.warning(
                 f'[{spider.name}] Некоторые статусы некорректны '
                 'и были проигнорированы.'
@@ -159,12 +146,12 @@ class PepParsePipeline:
 
         # Записываем CSV
         try:
+            # Формирование CSV через прямую запись строк
             with summary_file.open('w', encoding='utf-8', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(['Статус', 'Количество'])
-                for status, count in sorted(valid_statuses.items()):
-                    writer.writerow([status, count])
-                writer.writerow(['Total', total_count])
+                f.write('Статус,Количество\n')
+                for st, cnt in valid_statuses.items():
+                    f.write(f'{st},{cnt}\n')
+                f.write(f'Total,{total_count}\n')
         except Exception as e:
             self.logger.error(f'[{spider.name}] Ошибка при записи CSV: {e}')
             return
