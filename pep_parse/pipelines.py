@@ -1,19 +1,3 @@
-"""
-pep_parse/pipelines.py
-
-Pipeline для Scrapy-паука `PepSpider`, который:
-1. Собирает статистику по статусам PEP-документов.
-2. Формирует CSV-отчёт с количеством документов по каждому статусу.
-3. Логирует процесс обработки и возможные ошибки.
-
-Файл CSV создаётся в директории `settings.RESULTS_DIR` и имеет формат:
-'status_summary_YYYY-MM-DD_HH-MM-SS.csv'
-
-Структура CSV:
-- Статус: название статуса PEP
-- Количество: число документов с данным статусом
-- Последняя строка Total: суммарное количество документов
-"""
 from pathlib import Path
 from datetime import datetime
 import logging
@@ -27,34 +11,25 @@ from pep_parse import settings
 class PepParsePipeline:
     """
     Pipeline собирает статистику по статусам PEP-документов
-    и записывает сводный отчёт в CSV-файл.
+    и записывает сводный отчёт в файл csv.
 
-    После завершения работы паука создаётся файл формата:
-    'status_summary_YYYY-MM-DD_HH-MM-SS.csv'
-
-    В файле содержатся два столбца:
-        - 'Статус': название статуса PEP;
-        - 'Количество': число документов с данным статусом;
-    Строка файла 'Total' содержит суммарное количество документов.
+    В файле два столбца:
+    - Статус: название статуса PEP;
+    - Количество: число документов с данным статусом;
+    Строка файла Total содержит сумарное значение.
     """
 
     def __init__(self) -> None:
         """
-        Инициализирует директорию для вывода результатов
-        и создаёт внутренний словарь для подсчёта статусов.
-
-        params:
-            None
-        return:
-            None
+        Инициализирует директорию для вывода результатов,
+        создаёт внутренний словарь для подсчёта статусов.
         """
-        # Папка для сохранения CSV-файлов с результатами
+        # папка для сохранения результатов
         self.output_dir: Path = settings.RESULTS_DIR
-        # Создаём директорию, если её нет
         self.output_dir.mkdir(exist_ok=True)
-        # Словарь для подсчёта количества документов по каждому статусу
+        # словарь для подсчёта количества документов по статусу
         self.status_counter: Counter[str] = Counter()
-        # Логгер
+        # логгер
         self.logger = logging.getLogger(__name__)
 
     def open_spider(self, spider: scrapy.Spider) -> None:
@@ -69,11 +44,6 @@ class PepParsePipeline:
             None
         """
         self.status_counter = Counter()
-
-        self.logger.info(
-            f'[{spider.name}] Pipeline запущен. '
-            f'Счётчики статусов сброшены.'
-        )
 
     def process_item(
             self,
@@ -94,7 +64,7 @@ class PepParsePipeline:
         return:
             scrapy.Item: Исходный объект item для передачи следующему pipeline.
         """
-        # Получаем статус из item, если его нет — используем 'Unknown'
+        # Получаем статус из item, если его нет то используем Unknown
         status: str = item.get('status', 'Unknown')
 
         # Проверяем корректность статуса
@@ -156,9 +126,8 @@ class PepParsePipeline:
                 'и были проигнорированы.'
             )
 
-        # Записываем CSV
         try:
-            # Формирование CSV через прямую запись строк
+            # Формируем csv
             with summary_file.open('w', encoding='utf-8', newline='') as f:
                 f.write('Статус,Количество\n')
                 for st, cnt in valid_statuses.items():
@@ -168,7 +137,7 @@ class PepParsePipeline:
             self.logger.error(f'[{spider.name}] Ошибка при записи CSV: {e}')
             return
 
-        # Проверка успешного создания CSV
+        # Проверка создания CSV
         if summary_file.exists() and summary_file.stat().st_size > 0:
             self.logger.info(
                 f'[{spider.name}] CSV успешно создан '
@@ -178,5 +147,3 @@ class PepParsePipeline:
             self.logger.error(
                 f'[{spider.name}] CSV пустой или не создан: {summary_file}'
             )
-
-        self.logger.info(f'[{spider.name}] Всего документов: {total_count}')
