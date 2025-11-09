@@ -30,9 +30,9 @@ class PepSpider(scrapy.Spider):
         Для каждой найденной ссылки вызывает метод parse_pep().
 
         Параметры:
-            response: scrapy.http.Response — ответ на запрос к каталогу PEP.
-        return:
-            Генератор scrapy.Request для перехода по ссылкам.
+        - response: scrapy.http.Response.
+        Возвращает:
+        - Генератор scrapy.Request.
         """
         links: list[str] = response.css('a[href^="pep-"]::attr(href)').getall()
         link_count: int = 0
@@ -55,10 +55,10 @@ class PepSpider(scrapy.Spider):
         - Название PEP-документа;
         - Текущий статус PEP.
 
-        params:
-            response: scrapy.http.Response — ответ на запрос страницы PEP.
-        return:
-            Генератор с одним объектом PepParseItem.
+        Параметры:
+        - response: scrapy.http.Response.
+        Возвращает:
+        - Генератор с одним объектом PepParseItem.
         """
         title: Optional[str] = response.css('h1.page-title::text').get()
 
@@ -76,7 +76,7 @@ class PepSpider(scrapy.Spider):
         except ValueError:
             self.logger.warning(
                 f"Ошибка парсинга заголовка PEP на {response.url}: {title}. "
-                "Ожидался формат 'PEP N – Name'."
+                "Ожидался формат 'PEP N - Name'."
             )
             return
 
