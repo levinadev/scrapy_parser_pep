@@ -8,7 +8,7 @@ from pep_parse.items import PepParseItem
 
 class PepSpider(scrapy.Spider):
     """
-    Паук для парсинга списка всех PEP (Python Enhancement Proposals).
+    Паук для парсинга списка всех PEP.
 
     1. Начинает с главной страницы https://peps.python.org/.
     2. Собирает ссылки на страницы всех PEP.
@@ -29,7 +29,7 @@ class PepSpider(scrapy.Spider):
         Собирает ссылки на страницы всех PEP со страницы каталога.
         Для каждой найденной ссылки вызывает метод parse_pep().
 
-        params:
+        Параметры:
             response: scrapy.http.Response — ответ на запрос к каталогу PEP.
         return:
             Генератор scrapy.Request для перехода по ссылкам.
