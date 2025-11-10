@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime
 import logging
 from collections import Counter
+from csv import writer as csv_writer
 
 import scrapy
 
@@ -118,6 +119,9 @@ class PepParsePipeline:
             if k and isinstance(k, str)
         }
 
+        # Добавляем Total в словарь
+        valid_statuses['Total'] = total_count
+
         if len(valid_statuses) < len(self.status_counter):
             self.logger.warning(
                 f'[{spider.name}] Некоторые статусы некорректны '
@@ -126,14 +130,13 @@ class PepParsePipeline:
 
         try:
             # Формируем csv
-            with summary_file.open('w', encoding='utf-8', newline='') as f:
-                f.write('Статус,Количество\n')
-                for st, cnt in valid_statuses.items():
-                    f.write(f'{st},{cnt}\n')
-                f.write(f'Total,{total_count}\n')
+            with open(summary_file, 'w', newline='') as f:
+                writer = csv_writer(f)
+                writer.writerow(['Статус', 'Количество'])
+                writer.writerows(valid_statuses.items())
         except Exception as e:
             self.logger.error(f'[{spider.name}] Ошибка при записи CSV: {e}')
             return
 
-        # првоерка сохранения файла
+        # Проверка сохранения файла
         self.logger.info(f"[{spider.name}] csv-файл сохранён: {summary_file}")
