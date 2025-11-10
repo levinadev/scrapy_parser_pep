@@ -50,3 +50,8 @@ ITEM_PIPELINES: dict[str, int] = {
 # Шаблон имени файла для сводки по статусам PEP
 # %(time)s будет автоматически заменён на метку времени
 PEP_STATUS_SUMMARY_FILENAME: str = 'status_summary_%(time)s.csv'
+
+# Настройки для паука PEP
+SPIDER_PEP_NAME: str = 'pep'
+SPIDER_PEP_ALLOWED_DOMAINS: list[str] = ['peps.python.org']
+SPIDER_PEP_START_URLS: list[str] = ['https://peps.python.org/']

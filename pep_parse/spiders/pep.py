@@ -3,6 +3,7 @@ from typing import Generator, Optional
 import scrapy
 from scrapy.http import Response
 
+from pep_parse import settings
 from pep_parse.items import PepParseItem
 
 
@@ -17,9 +18,9 @@ class PepSpider(scrapy.Spider):
        - Название PEP-документа;
        - Текущий статус PEP.
     """
-    name: str = 'pep'
-    allowed_domains: list[str] = ['peps.python.org']
-    start_urls: list[str] = ['https://peps.python.org/']
+    name: str = settings.SPIDER_PEP_NAME
+    allowed_domains: list[str] = settings.SPIDER_PEP_ALLOWED_DOMAINS
+    start_urls: list[str] = settings.SPIDER_PEP_START_URLS
 
     def parse(
             self,
